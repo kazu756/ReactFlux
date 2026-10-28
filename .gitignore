@@ -42,3 +42,9 @@ dist-ssr
 .eslintcache
 stats.html
 src/version-info.json
+
+# Worker and local environment files
+.env
+.env.*
+!.env.example
+.wrangler/
