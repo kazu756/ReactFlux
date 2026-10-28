@@ -568,6 +568,7 @@ const ArticleDetail = forwardRef((_, ref) => {
       >
         <FadeTransition>
           <div
+            key={`${activeContent.id}:${activeContent.title}`}
             className="article-header"
             style={{ maxWidth: responsiveMaxWidth, textAlign: titleAlignment }}
           >
@@ -588,7 +589,11 @@ const ArticleDetail = forwardRef((_, ref) => {
               <Typography.Text>
                 <CustomLink text={feedTitle} url={`/feed/${feedId}`} />
               </Typography.Text>
-              {activeContent.author && <Typography.Text> - {activeContent.author}</Typography.Text>}
+              {activeContent.author && (
+                <Typography.Text>
+                  <span> - {activeContent.author}</span>
+                </Typography.Text>
+              )}
               <Typography.Text>
                 <Tag
                   size="small"
@@ -609,7 +614,7 @@ const ArticleDetail = forwardRef((_, ref) => {
             <Divider />
           </div>
           <div
-            key={activeContent.id}
+            key={`${activeContent.id}:${renderableContentHtml}`}
             aria-busy={isArticleBodyPending || undefined}
             className="article-body"
             style={{

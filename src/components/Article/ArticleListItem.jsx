@@ -34,7 +34,7 @@ const ArticleListItem = ({ entry, previewContent }) => {
             <span aria-hidden="true" className="list-entry-summary-separator">
               —
             </span>
-            {listSummary}
+            <span>{listSummary}</span>
           </span>
         )}
       </div>

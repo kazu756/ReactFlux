@@ -1,4 +1,7 @@
+import { getArticleImageSource } from "@/domain/articles/articleImageSource"
+import { authState } from "@/store/authState"
 import { extractHeadingsFromDocument } from "@/utils/dom"
+import { prepareArticleImages } from "@/utils/prepare-article-images"
 
 // Keep this allowlist aligned with Miniflux's reader/sanitizer/url.go.
 const ALLOWED_URI_SCHEMES = new Set([
@@ -184,7 +187,12 @@ const getPositiveDimension = (element, attribute) => {
 }
 
 const prepareEntry = (entry) => {
-  const content = typeof entry.content === "string" ? entry.content : ""
+  const originalContent = typeof entry.content === "string" ? entry.content : ""
+  const content = prepareArticleImages(
+    originalContent,
+    import.meta.env.VITE_BUNSHUN_IMAGE_WORKER_URL,
+    authState.get().server,
+  )
   const doc = new DOMParser().parseFromString(content, "text/html")
   const isWeiboFeed =
     entry.feed?.site_url && /https:\/\/weibo\.com\/\d+\//.test(entry.feed.site_url)
@@ -192,7 +200,18 @@ const prepareEntry = (entry) => {
   const firstImage = isWeiboFeed ? getWeiboFirstImage(doc) : doc.querySelector("img")
   const video = doc.querySelector("video")
   const embeddedMedia = video ?? doc.querySelector("audio, iframe")
-  const enclosures = Array.isArray(entry.enclosures) ? entry.enclosures : []
+  const enclosures = (Array.isArray(entry.enclosures) ? entry.enclosures : []).map((item) =>
+    item && typeof item === "object"
+      ? {
+          ...item,
+          url: getArticleImageSource(
+            item.url,
+            import.meta.env.VITE_BUNSHUN_IMAGE_WORKER_URL,
+            authState.get().server,
+          ),
+        }
+      : item,
+  )
   const attachments = buildAttachmentModel(enclosures)
 
   const coverElement = firstImage ?? video

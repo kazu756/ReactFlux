@@ -149,6 +149,30 @@ export default [
     },
   },
   {
+    // Portable modules are also imported by the Node regression tests and Workers.
+    files: [
+      "src/domain/articles/*.js",
+      "src/apis/bunshunArticles.js",
+      "src/utils/prepare-article-images.js",
+      "workers/**/*.js",
+      "test/**/*.js",
+    ],
+    rules: {
+      "import/extensions": "off",
+      "import/no-relative-parent-imports": "off",
+      "unicorn/filename-case": "off",
+    },
+  },
+  {
+    files: ["test/**/*.js"],
+    languageOptions: { globals: globals.node },
+    rules: { "unicorn/no-await-expression-member": "off", "unicorn/prefer-https": "off" },
+  },
+  {
+    files: ["workers/**/src/index.js"],
+    languageOptions: { globals: { ...globals.browser, caches: "readonly" } },
+  },
+  {
     files: ["scripts/**/*.js"],
     languageOptions: { globals: globals.node },
     rules: {

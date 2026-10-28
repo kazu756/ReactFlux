@@ -8,6 +8,7 @@ import {
   setEntriesStarred,
   updateEntriesStatus,
 } from "@/apis"
+import { fetchReaderContent } from "@/apis/bunshunArticles"
 import { polyglotState } from "@/hooks/useLanguage"
 import {
   acquireOriginalContentRequest,
@@ -26,7 +27,6 @@ import {
   setUnreadTodayCount,
 } from "@/store/dataState"
 import { checkIsInLast24Hours } from "@/utils/date"
-import { extractHeadings } from "@/utils/dom"
 import {
   getEntryMutationSessionRevision,
   notifyEntryMutationIdle,
@@ -35,6 +35,7 @@ import {
   recordEntryMutationRequestStart,
   registerEntryMutationSessionReset,
 } from "@/utils/entry-mutation-state"
+import prepareEntry from "@/utils/entry-presentation"
 import { openExternalUrl } from "@/utils/url"
 
 const updateEntries = (entries, updatedEntries) => {
@@ -454,7 +455,13 @@ const useEntryActions = () => {
     }
 
     try {
-      const { content: newContent, reading_time: readingTime } = await getOriginalContent(entryId)
+      const result = await fetchReaderContent(
+        activeContent,
+        import.meta.env.VITE_BUNSHUN_ARTICLE_WORKER_URL,
+        getOriginalContent,
+      )
+      const { content: newContent, reading_time: readingTime } =
+        typeof result === "string" ? { content: result } : result
       if (!isOriginalContentRequestCurrent(entryId, requestToken)) {
         return false
       }
@@ -465,12 +472,11 @@ const useEntryActions = () => {
       }
 
       const newReadingTime = readingTime ?? currentActiveContent.reading_time
-      const updatedActiveContent = {
+      const updatedActiveContent = prepareEntry({
         ...currentActiveContent,
         content: newContent,
-        headings: extractHeadings(newContent),
         reading_time: newReadingTime,
-      }
+      })
       batch(() => {
         setActiveContent(updatedActiveContent)
         markOriginalContentFetched(entryId)
