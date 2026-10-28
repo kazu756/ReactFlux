@@ -177,10 +177,28 @@ export function extractBunshunPage(html, requestedUrl) {
   }
   const pages = new Set()
   let active = 0
+  let photoPage = null
+  let photoNext = false
   if (navigation.length > 0) {
     for (const anchor of find(navigation[0], (n) => n.name === "a")) {
       const text = getText(anchor).trim()
       const href = anchor.attribs?.href
+      // A final numbered page can lead to the same article's photo gallery.
+      // It is navigation, not a continuation of the article body.
+      const photoPath = `/articles/photo/${expected.id}`
+      if (href === photoPath || href === `https://bunshun.jp${photoPath}`) {
+        if (/^[1-9][0-9]*$/.test(text) && !classes(anchor).has("active")) {
+          if (photoPage !== null) {
+            throw new Error("Repeated photo gallery page")
+          }
+          photoPage = Number(text)
+        } else if (classes(anchor).has("next") && !photoNext) {
+          photoNext = true
+        } else {
+          throw new Error("Invalid photo gallery navigation")
+        }
+        continue
+      }
       if (/^[1-9][0-9]*$/.test(text)) {
         const page = Number(text)
         if (page > MAX_BUNSHUN_PAGES || pages.has(page)) {
@@ -223,6 +241,12 @@ export function extractBunshunPage(html, requestedUrl) {
   const ordered = [...pages].toSorted((a, b) => a - b)
   if (ordered.length === 0 || ordered.some((page, index) => page !== index + 1)) {
     throw new Error("Noncontiguous pagination")
+  }
+  if (
+    (photoPage !== null && photoPage !== ordered.at(-1) + 1) ||
+    (photoNext && (photoPage === null || expected.page !== ordered.at(-1)))
+  ) {
+    throw new Error("Photo gallery must follow the final article page")
   }
   const content = (bodies[0].children || [])
     .map((node) => sanitizeBunshunBody(node, requestedUrl))
