@@ -36,6 +36,7 @@ import extractCodeContent from "@/utils/code-content"
 import { getCodeLanguage } from "@/utils/code-languages"
 import { generateReadableDate, generateReadingTime } from "@/utils/date"
 import buildArticleImageModel from "@/utils/images"
+import translationSafeText from "@/utils/translation-safe-text"
 import { getSafeExternalUrl } from "@/utils/url"
 import "./ArticleDetail.css"
 import "./littlefoot.css"
@@ -175,7 +176,7 @@ const processFigcaptionContent = (children) => {
 
   return children.map((child, index) => {
     if (child.type === "text") {
-      return child.data
+      return translationSafeText(child.data, child, index)
     }
     if (child.type === "tag") {
       const Tag = child.name
@@ -296,6 +297,7 @@ const handleIframe = (node) => {
 
 const getHtmlParserOptions = (getImageIndex, togglePhotoSlider) => {
   const options = {
+    transform: translationSafeText,
     replace: (node) => {
       if (node.type !== "tag") {
         return node
