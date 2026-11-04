@@ -48,4 +48,24 @@ test("prepared entries share Worker URLs across content, covers and attachments,
   assert.equal(full.starred, true)
   assert.equal(full.status, "read")
   assert.equal(prepareEntry(full).content, full.content)
+
+  const placeholder = "data:image/gif;base64,R0lGODlhAQABAGAAACH5BAEKAP8ALAAAAAABAAEAAAgEAP8FBAA7"
+  const enclosureUrl = "https://shuon.ismcdn.jp/mwimgs/photo.jpg"
+  const enclosure = { url: enclosureUrl, mime_type: "image/jpeg" }
+  const transparent = prepareEntry({
+    content: `<img src="${placeholder}" width="800" height="500">`,
+    enclosures: [enclosure],
+  })
+  assert.equal(transparent.coverSource, enclosureUrl)
+  assert.equal(transparent.coverWidth, null)
+  assert.equal(transparent.coverHeight, null)
+  const normal = prepareEntry({
+    content: '<img src="https://example.com/body.jpg" width="640" height="480">',
+    enclosures: [enclosure],
+  })
+  assert.equal(normal.coverSource, "https://example.com/body.jpg")
+  assert.equal(normal.coverWidth, 640)
+  assert.equal(normal.coverHeight, 480)
+  assert.equal(prepareEntry({ content: "<p>No image</p>" }).coverSource, null)
+  assert.equal(prepareEntry({ content: `<img src="${placeholder}">` }).coverSource, null)
 })
