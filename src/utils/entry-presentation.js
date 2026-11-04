@@ -197,7 +197,13 @@ const prepareEntry = (entry) => {
   const isWeiboFeed =
     entry.feed?.site_url && /https:\/\/weibo\.com\/\d+\//.test(entry.feed.site_url)
 
-  const firstImage = isWeiboFeed ? getWeiboFirstImage(doc) : doc.querySelector("img")
+  const candidateImages = isWeiboFeed ? [getWeiboFirstImage(doc)] : [...doc.querySelectorAll("img")]
+  const firstImage = candidateImages.find((image) => {
+    const source = image?.getAttribute("src")?.trim()
+    if (!source) {return false}
+    // The publisher uses this one-pixel GIF while JavaScript loads the photo.
+    return !/^data:image\/gif;base64,R0lGODlhAQAB/i.test(source)
+  })
   const video = doc.querySelector("video")
   const embeddedMedia = video ?? doc.querySelector("audio, iframe")
   const enclosures = (Array.isArray(entry.enclosures) ? entry.enclosures : []).map((item) =>
