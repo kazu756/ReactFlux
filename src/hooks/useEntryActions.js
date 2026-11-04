@@ -479,6 +479,17 @@ const useEntryActions = () => {
       })
       batch(() => {
         setActiveContent(updatedActiveContent)
+        // Merge only fetched presentation fields into the latest list item.
+        // Status and star changes made while fetching must remain intact.
+        setEntries(
+          contentState
+            .get()
+            .entries.map((entry) =>
+              entry.id === entryId
+                ? prepareEntry({ ...entry, content: newContent, reading_time: newReadingTime })
+                : entry,
+            ),
+        )
         markOriginalContentFetched(entryId)
       })
       Message.success(polyglot.t("actions.fetched_content_success"))
