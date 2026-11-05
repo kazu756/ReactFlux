@@ -1,4 +1,14 @@
 {
+  "ai": {
+    "settings": "OpenAI 要約",
+    "key_description": "キーはこのブラウザに保存されます。要約を実行すると記事の文章がOpenAIに送信されます。",
+    "model": "モデル",
+    "prompt": "要約プロンプト",
+    "save": "OpenAI設定を保存",
+    "saved": "OpenAI設定を保存しました。",
+    "summarize": "AIで要約",
+    "failed": "要約を生成できませんでした。"
+  },
   "app": {
     "new_version_available": "新しいバージョンが利用可能です",
     "new_version_available_description": "GitHub で最新バージョンを確認してください",

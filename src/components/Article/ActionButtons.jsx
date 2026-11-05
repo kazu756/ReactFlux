@@ -66,6 +66,7 @@ const DesktopButtons = memo(
         {commonButtons.status}
         {commonButtons.star}
         {commonButtons.fetch}
+        {commonButtons.summary}
         {commonButtons.toc}
         {hasIntegrations && (
           <CustomTooltip
@@ -96,12 +97,13 @@ const MobileButtons = memo(({ commonButtons, hasHeadings, moveContextActionToMen
     {commonButtons.navigationRight}
     {!moveContextActionToMenu && !hasHeadings && commonButtons.fetch}
     {!moveContextActionToMenu && commonButtons.toc}
+    {commonButtons.summary}
     {commonButtons.more}
   </div>
 ))
 MobileButtons.displayName = "MobileButtons"
 
-const ActionButtons = () => {
+const ActionButtons = ({ summaryButtonRef }) => {
   const { detailCloseButtonRef } = useDesktopSidebar()
   const { activeContent, isOriginalContentFetched } = useStore(contentState, {
     keys: ["activeContent", "isOriginalContentFetched"],
@@ -247,6 +249,7 @@ const ActionButtons = () => {
   const rightNavigation = isBrowsingRightToLeft ? previousNavigation : nextNavigation
 
   const commonButtons = {
+    summary: <span ref={summaryButtonRef} style={{ display: "contents" }} />,
     navigationLeft:
       isBelowMedium && enableSwipeGesture ? undefined : (
         <CustomTooltip mini content={leftNavigation.label}>
