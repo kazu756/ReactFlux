@@ -337,7 +337,7 @@ const getHtmlParserOptions = (getImageIndex, togglePhotoSlider) => {
   return options
 }
 
-const ArticleDetail = forwardRef((_, ref) => {
+const ArticleDetail = forwardRef(({ summaryButtonTarget }, ref) => {
   const navigate = useNavigate()
   const { isBelowMedium } = useScreenWidth()
   const prefersReducedMotion = useStore(prefersReducedMotionState)
@@ -634,6 +634,7 @@ const ArticleDetail = forwardRef((_, ref) => {
                 <ArticleSummary
                   key={`${activeContent.id}:${activeContent.content}`}
                   article={activeContent}
+                  buttonTarget={summaryButtonTarget}
                 />
                 {primaryMedia && (
                   <EnclosurePlayer
