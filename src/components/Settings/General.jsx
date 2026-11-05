@@ -1,4 +1,4 @@
-import { Button, Message, Modal, Select, Switch, Tooltip } from "@arco-design/web-react"
+import { Button, Input, Message, Modal, Select, Switch, Tooltip } from "@arco-design/web-react"
 import {
   IconDownload,
   IconInfoCircleFill,
@@ -19,6 +19,7 @@ import { ensureCurrentHomePage } from "@/store/homePageState"
 import { settingsState, updateSettings } from "@/store/settingsState"
 import { confirmDialogProps, destructiveConfirmButtonProps } from "@/utils/confirm-dialog"
 import { downloadFile, readFileAsText } from "@/utils/file"
+import { defaultSummarySettings, summarySettings } from "@/utils/openai-summary"
 import {
   applySettingsBackup,
   buildSettingsBackup,
@@ -43,6 +44,7 @@ const General = () => {
   })
   const { polyglot } = useStore(polyglotState)
   const { isBelowMedium } = useScreenWidth()
+  const [ai, setAi] = useState(() => summarySettings.get())
   const importInputRef = useRef(null)
   const [isImportingSettings, setIsImportingSettings] = useState(false)
   const [homePagePickerVisible, setHomePagePickerVisible] = useState(false)
@@ -171,6 +173,50 @@ const General = () => {
             onClose={() => setHomePagePickerVisible(false)}
           />
         </SettingItem>
+      </SettingSection>
+
+      <SettingSection title={polyglot.t("ai.settings", { _: "OpenAI summary" })}>
+        <SettingItem
+          title="OpenAI API key"
+          description={polyglot.t("ai.key_description", {
+            _: "Stored in this browser. Article text is sent to OpenAI when you request a summary.",
+          })}
+        >
+          <Input.Password
+            aria-label="OpenAI API key"
+            autoComplete="off"
+            value={ai.apiKey}
+            onChange={(apiKey) => setAi({ ...ai, apiKey })}
+          />
+        </SettingItem>
+        <SettingItem title={polyglot.t("ai.model", { _: "Model" })}>
+          <Input
+            aria-label={polyglot.t("ai.model", { _: "Model" })}
+            value={ai.model}
+            onChange={(model) => setAi({ ...ai, model })}
+          />
+        </SettingItem>
+        <SettingItem title={polyglot.t("ai.prompt", { _: "Summary prompt" })}>
+          <Input.TextArea
+            aria-label={polyglot.t("ai.prompt", { _: "Summary prompt" })}
+            value={ai.prompt}
+            onChange={(prompt) => setAi({ ...ai, prompt })}
+          />
+        </SettingItem>
+        <Button
+          onClick={() => {
+            const values = {
+              apiKey: ai.apiKey.trim(),
+              model: ai.model.trim() || defaultSummarySettings.model,
+              prompt: ai.prompt.trim() || defaultSummarySettings.prompt,
+            }
+            summarySettings.set(values)
+            setAi(values)
+            Message.success(polyglot.t("ai.saved", { _: "OpenAI settings saved." }))
+          }}
+        >
+          {polyglot.t("ai.save", { _: "Save OpenAI settings" })}
+        </Button>
       </SettingSection>
 
       <SettingSection title={polyglot.t("settings.section_data_maintenance")}>
