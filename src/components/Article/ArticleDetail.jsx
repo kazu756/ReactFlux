@@ -17,6 +17,7 @@ import {
 import { useNavigate } from "react-router"
 
 import ArticleEnclosures from "./ArticleEnclosures"
+import ArticleSummary from "./ArticleSummary"
 import ArticleTable from "./ArticleTable"
 import DeferredCodeBlock from "./DeferredCodeBlock"
 import EnclosurePlayer from "./EnclosurePlayer"
@@ -630,6 +631,10 @@ const ArticleDetail = forwardRef((_, ref) => {
               <div className="article-body-loading" />
             ) : (
               <>
+                <ArticleSummary
+                  key={`${activeContent.id}:${activeContent.content}`}
+                  article={activeContent}
+                />
                 {primaryMedia && (
                   <EnclosurePlayer
                     key={primaryMedia.id ?? primaryMedia.url}
