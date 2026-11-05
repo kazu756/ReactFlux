@@ -62,6 +62,7 @@ const Content = ({ info, getEntries, markAllAsRead }) => {
   const isBrowsingRightToLeft = isRightToLeftBrowsing(contentBrowsingDirection)
   const isFullWidthLayout = articleListLayout === "card" || articleListLayout === "list"
 
+  const [summaryButtonTarget, setSummaryButtonTarget] = useState(null)
   const [isSwipingLeft, setIsSwipingLeft] = useState(false)
   const [isSwipingRight, setIsSwipingRight] = useState(false)
   const cardsRef = useRef(null)
@@ -261,7 +262,7 @@ const Content = ({ info, getEntries, markAllAsRead }) => {
           })}
           {...handlers}
         >
-          {!isBelowMedium && <ActionButtons />}
+          {!isBelowMedium && <ActionButtons summaryButtonRef={setSummaryButtonTarget} />}
           {isArticleLoading ? (
             <div style={{ flex: 1 }} />
           ) : (
@@ -279,11 +280,11 @@ const Content = ({ info, getEntries, markAllAsRead }) => {
                 )}
               </AnimatePresence>
               <Suspense fallback={<div aria-busy="true" style={{ flex: 1 }} />}>
-                <ArticleDetail ref={entryDetailRef} />
+                <ArticleDetail ref={entryDetailRef} summaryButtonTarget={summaryButtonTarget} />
               </Suspense>
             </>
           )}
-          {isBelowMedium && <ActionButtons />}
+          {isBelowMedium && <ActionButtons summaryButtonRef={setSummaryButtonTarget} />}
         </div>
       ) : (
         !isFullWidthLayout && <div className="content-empty content-wrapper" />
