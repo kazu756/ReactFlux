@@ -35,9 +35,11 @@
 
   const selectors = { heading: ".article-title", body: ".article-body" };
   const comparePane = new URLSearchParams(location.search).has("translation-pane");
+  const compareScroll = new URLSearchParams(location.search).has("translation-scroll");
   const previous = {};
   let probeBody;
   let outsideProbe;
+  let scrollSiblingProbe;
   let probeIndex = 0;
   const probeText = [
     "Public libraries will stay open later to give students more time to study.",
@@ -60,13 +62,22 @@
     if (!body || body === probeBody) return;
     probeBody = body;
     const text = probeText[probeIndex++ % probeText.length];
-    const inside = makeProbe("A（ペイン内）", text);
+    const inside = makeProbe(compareScroll ? "A（スクロール領域内）" : "A（ペイン内）", text);
     inside.id = "translation-pane-inside";
     const outside = makeProbe("B（ペイン外）", text);
     outside.id = "translation-pane-outside";
     outside.style.cssText =
       "position:fixed;right:10px;top:48px;width:min(300px,85vw);padding:8px;background:#fff;color:#111;z-index:1000";
     body.prepend(inside);
+    const scroller = body.closest(".scroll-container");
+    if (compareScroll && scroller) {
+      const sibling = makeProbe("C（ペイン内・スクロール領域外）", text);
+      sibling.id = "translation-scroll-sibling";
+      sibling.style.cssText = "margin:0 auto;padding:4px 8px;max-width:680px";
+      scrollSiblingProbe?.remove();
+      scroller.before(sibling);
+      scrollSiblingProbe = sibling;
+    }
     if (outsideProbe) outsideProbe.replaceWith(outside);
     else document.body.append(outside);
     outsideProbe = outside;
@@ -75,6 +86,7 @@
   if (comparePane) {
     selectors.inside = "#translation-pane-inside";
     selectors.outside = "#translation-pane-outside";
+    if (compareScroll) selectors.scrollSibling = "#translation-scroll-sibling";
   }
   const started = performance.now();
   let route = location.pathname;
