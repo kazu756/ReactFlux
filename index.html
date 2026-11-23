@@ -34,8 +34,48 @@
   if (!new URLSearchParams(location.search).has("translation-trace")) return;
 
   const selectors = { heading: ".article-title", body: ".article-body" };
+  const comparePane = new URLSearchParams(location.search).has("translation-pane");
   const previous = {};
+  let probeBody;
+  let outsideProbe;
+  let probeIndex = 0;
+  const probeText = [
+    "Public libraries will stay open later to give students more time to study.",
+    "Volunteers repaired the wooden bridges so visitors can walk to the lighthouse again.",
+  ];
+
+  function makeProbe(label, text) {
+    const element = document.createElement("p");
+    const caption = document.createElement("strong");
+    caption.translate = false;
+    caption.textContent = label + " ";
+    const sample = document.createElement("span");
+    sample.textContent = text;
+    element.append(caption, sample);
+    return element;
+  }
+
+  function compareLocations() {
+    const body = document.querySelector(".article-body");
+    if (!body || body === probeBody) return;
+    probeBody = body;
+    const text = probeText[probeIndex++ % probeText.length];
+    const inside = makeProbe("A（ペイン内）", text);
+    inside.id = "translation-pane-inside";
+    const outside = makeProbe("B（ペイン外）", text);
+    outside.id = "translation-pane-outside";
+    outside.style.cssText =
+      "position:fixed;right:10px;top:48px;width:min(300px,85vw);padding:8px;background:#fff;color:#111;z-index:1000";
+    body.prepend(inside);
+    if (outsideProbe) outsideProbe.replaceWith(outside);
+    else document.body.append(outside);
+    outsideProbe = outside;
+  }
   const events = [];
+  if (comparePane) {
+    selectors.inside = "#translation-pane-inside";
+    selectors.outside = "#translation-pane-outside";
+  }
   const started = performance.now();
   let route = location.pathname;
   let translated;
@@ -52,6 +92,7 @@
   }
 
   function inspect(records) {
+    if (comparePane) compareLocations();
     if (route !== location.pathname) {
       route = location.pathname;
       record("navigation");
@@ -78,7 +119,7 @@
   }
 
   const observer = new MutationObserver(inspect);
-  observer.observe(document.getElementById("root"), {
+  observer.observe(comparePane ? document.body : document.getElementById("root"), {
     subtree: true, childList: true, characterData: true,
   });
   observer.observe(document.documentElement, {
