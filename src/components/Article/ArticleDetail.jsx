@@ -83,6 +83,35 @@ function TranslationDiagnostics({ articleId }) {
   return <output ref={outputRef} translate="no" style={{ display: "block", padding: "8px" }} />
 }
 
+const showTranslationComparison =
+  new URLSearchParams(globalThis.location.search).has("translation-compare")
+
+function TranslationComparison({ firstArticle }) {
+  const nativeTextRef = useRef(null)
+  const sample = firstArticle
+    ? "Several public libraries will stay open later during the week. The new schedule gives students more time to study."
+    : "Volunteers repaired wooden bridges and cleared fallen branches. Visitors will be able to walk to the lighthouse again."
+
+  useLayoutEffect(() => {
+    const text = document.createElement("span")
+    text.textContent = sample
+    nativeTextRef.current.replaceChildren(text)
+  }, [sample])
+
+  return (
+    <section aria-label="翻訳の比較">
+      <p>
+        <strong translate="no">A（React） </strong>
+        <span><span>{sample}</span></span>
+      </p>
+      <p>
+        <strong translate="no">B（通常の DOM） </strong>
+        <span ref={nativeTextRef} />
+      </p>
+    </section>
+  )
+}
+
 const ArticleLightbox = lazy(() => import("./ArticleLightbox"))
 const EMPTY_ATTACHMENTS = { items: [], primaryMedia: null }
 
@@ -386,6 +415,7 @@ const ArticleDetail = forwardRef(({ summaryButtonTarget }, ref) => {
   const activeContent = useStore(activeContentState)
   const [readyArticleId, setReadyArticleId] = useState(null)
   const articleId = activeContent.id
+  const firstComparisonArticleId = useRef(articleId)
   const isArticleBodyReady = readyArticleId === articleId
   const renderableContentHtml = isArticleBodyReady ? (activeContent.content ?? "") : ""
 
@@ -681,6 +711,9 @@ const ArticleDetail = forwardRef(({ summaryButtonTarget }, ref) => {
                   enclosure={primaryMedia}
                   poster={coverSource}
                 />
+              )}
+              {showTranslationComparison && (
+                <TranslationComparison firstArticle={articleId === firstComparisonArticleId.current} />
               )}
               {parsedHtml}
               <ArticleEnclosures
