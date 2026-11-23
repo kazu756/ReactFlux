@@ -1,5 +1,4 @@
 import { Divider, Tag, Typography } from "@arco-design/web-react"
-import { AnimatePresence } from "framer-motion"
 import { useStore } from "@nanostores/react"
 import ReactHtmlParser, { attributesToProps, domToReact } from "html-react-parser"
 import { littlefoot } from "littlefoot"
@@ -27,7 +26,6 @@ import ImageOverlayButton from "./ImageOverlayButton"
 
 import AdaptiveScrollArea from "@/components/ui/AdaptiveScrollArea"
 import CustomLink from "@/components/ui/CustomLink"
-import FadeTransition from "@/components/ui/FadeTransition"
 import PlyrPlayer from "@/components/ui/LazyPlyrPlayer"
 import usePhotoSlider from "@/hooks/usePhotoSlider"
 import useScreenWidth, { prefersReducedMotionState } from "@/hooks/useScreenWidth"
@@ -614,109 +612,105 @@ const ArticleDetail = forwardRef(({ summaryButtonTarget }, ref) => {
         scrollableNodeProps={{ tabIndex: -1 }}
       >
         {showTranslationDiagnostics && <TranslationDiagnostics articleId={activeContent.id} />}
-        <AnimatePresence initial={false} mode="wait">
-          <FadeTransition key={activeContent.id}>
-            <div
-              key={`${activeContent.id}:${activeContent.title}`}
-              className="article-header"
-              style={{ maxWidth: responsiveMaxWidth, textAlign: titleAlignment }}
-            >
-              <Typography.Title
-                className="article-title"
-                heading={3}
-                style={{ fontFamily: fontFamily }}
+        <div
+          key={`${activeContent.id}:${activeContent.title}`}
+          className="article-header"
+          style={{ maxWidth: responsiveMaxWidth, textAlign: titleAlignment }}
+        >
+          <Typography.Title
+            className="article-title"
+            heading={3}
+            style={{ fontFamily: fontFamily }}
+          >
+            {sourceUrl ? (
+              <a href={sourceUrl} rel="noopener" target="_blank">
+                {activeContent.title}
+              </a>
+            ) : (
+              activeContent.title
+            )}
+          </Typography.Title>
+          <div className="article-meta">
+            <Typography.Text>
+              <CustomLink text={feedTitle} url={`/feed/${feedId}`} />
+            </Typography.Text>
+            {activeContent.author && (
+              <Typography.Text>
+                <span> - {activeContent.author}</span>
+              </Typography.Text>
+            )}
+            <Typography.Text>
+              <Tag
+                size="small"
+                style={{ marginLeft: "10px", cursor: "pointer" }}
+                onClick={() => navigate(`/category/${categoryId}`)}
               >
-                {sourceUrl ? (
-                  <a href={sourceUrl} rel="noopener" target="_blank">
-                    {activeContent.title}
-                  </a>
-                ) : (
-                  activeContent.title
-                )}
-              </Typography.Title>
-              <div className="article-meta">
-                <Typography.Text>
-                  <CustomLink text={feedTitle} url={`/feed/${feedId}`} />
-                </Typography.Text>
-                {activeContent.author && (
-                  <Typography.Text>
-                    <span> - {activeContent.author}</span>
-                  </Typography.Text>
-                )}
-                <Typography.Text>
-                  <Tag
-                    size="small"
-                    style={{ marginLeft: "10px", cursor: "pointer" }}
-                    onClick={() => navigate(`/category/${categoryId}`)}
-                  >
-                    {categoryTitle}
-                  </Tag>
-                </Typography.Text>
-              </div>
-              <Typography.Text className="article-date">
-                {generateReadableDate(activeContent.published_at)}
-              </Typography.Text>
-              <br />
-              <Typography.Text className="article-date">
-                {generateReadingTime(activeContent.reading_time)}
-              </Typography.Text>
-              <Divider />
-            </div>
-            <div
-              key={`${activeContent.id}:${renderableContentHtml}`}
-              aria-busy={isArticleBodyPending || undefined}
-              className="article-body"
-              style={{
-                fontSize: `${fontSize}rem`,
-                maxWidth: responsiveMaxWidth,
-                fontFamily: fontFamily,
-                "--article-width": articleWidth,
-              }}
-            >
-              {isArticleBodyPending ? (
-                <div className="article-body-loading" />
-              ) : (
-                <>
-                  <ArticleSummary
-                    key={`${activeContent.id}:${activeContent.content}`}
-                    article={activeContent}
-                    buttonTarget={summaryButtonTarget}
-                  />
-                  {primaryMedia && (
-                    <EnclosurePlayer
-                      key={primaryMedia.id ?? primaryMedia.url}
-                      enclosure={primaryMedia}
-                      poster={coverSource}
-                    />
-                  )}
-                  {parsedHtml}
-                  <ArticleEnclosures
-                    items={visibleAttachments}
-                    open={enclosuresOpen}
-                    onImagePreview={togglePhotoSlider}
-                    onOpenChange={handleEnclosuresOpenChange}
-                  />
-                  {hasOpenedPhotoSlider && (
-                    <Suspense fallback={null}>
-                      <ArticleLightbox
-                        animation={lightboxAnimationConfig}
-                        closeRequested={isPhotoSliderCloseRequested}
-                        direction={contentBrowsingDirection}
-                        index={selectedIndex}
-                        open={isPhotoSliderVisible}
-                        slides={imageSlides}
-                        onClose={completePhotoSliderClose}
-                        onExited={handlePhotoSliderExited}
-                        onExiting={handlePhotoSliderExiting}
-                        onView={handlePhotoSliderView}
-                      />
-                    </Suspense>
-                  )}
-                </>
+                {categoryTitle}
+              </Tag>
+            </Typography.Text>
+          </div>
+          <Typography.Text className="article-date">
+            {generateReadableDate(activeContent.published_at)}
+          </Typography.Text>
+          <br />
+          <Typography.Text className="article-date">
+            {generateReadingTime(activeContent.reading_time)}
+          </Typography.Text>
+          <Divider />
+        </div>
+        <div
+          key={`${activeContent.id}:${renderableContentHtml}`}
+          aria-busy={isArticleBodyPending || undefined}
+          className="article-body"
+          style={{
+            fontSize: `${fontSize}rem`,
+            maxWidth: responsiveMaxWidth,
+            fontFamily: fontFamily,
+            "--article-width": articleWidth,
+          }}
+        >
+          {isArticleBodyPending ? (
+            <div className="article-body-loading" />
+          ) : (
+            <>
+              <ArticleSummary
+                key={`${activeContent.id}:${activeContent.content}`}
+                article={activeContent}
+                buttonTarget={summaryButtonTarget}
+              />
+              {primaryMedia && (
+                <EnclosurePlayer
+                  key={primaryMedia.id ?? primaryMedia.url}
+                  enclosure={primaryMedia}
+                  poster={coverSource}
+                />
               )}
-            </div>
-          </FadeTransition>
-        </AnimatePresence>
+              {parsedHtml}
+              <ArticleEnclosures
+                items={visibleAttachments}
+                open={enclosuresOpen}
+                onImagePreview={togglePhotoSlider}
+                onOpenChange={handleEnclosuresOpenChange}
+              />
+              {hasOpenedPhotoSlider && (
+                <Suspense fallback={null}>
+                  <ArticleLightbox
+                    animation={lightboxAnimationConfig}
+                    closeRequested={isPhotoSliderCloseRequested}
+                    direction={contentBrowsingDirection}
+                    index={selectedIndex}
+                    open={isPhotoSliderVisible}
+                    slides={imageSlides}
+                    onClose={completePhotoSliderClose}
+                    onExited={handlePhotoSliderExited}
+                    onExiting={handlePhotoSliderExiting}
+                    onView={handlePhotoSliderView}
+                  />
+                </Suspense>
+              )}
+            </>
+          )}
+        </div>
       </AdaptiveScrollArea>
     </article>
   )
