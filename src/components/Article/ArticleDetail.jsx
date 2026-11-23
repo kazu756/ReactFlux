@@ -565,6 +565,7 @@ const ArticleDetail = forwardRef(({ summaryButtonTarget }, ref) => {
       tabIndex={-1}
     >
       <AdaptiveScrollArea
+        native
         ref={scrollContainerRef}
         className="scroll-container"
         scrollableNodeProps={{ tabIndex: -1 }}
