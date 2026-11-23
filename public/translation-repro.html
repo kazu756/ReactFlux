@@ -31,7 +31,9 @@ const samples = [
     body: "Volunteers have repaired the wooden bridges and cleared fallen branches from the coastal paths. The local council expects the trails to reopen next week. Visitors will be able to reach the lighthouse on foot again."
   }
 ];
-const mode = new URLSearchParams(location.search).get("mode") === "url";
+const mode = new URLSearchParams(location.search).get("mode");
+const changesTitle = mode === "title";
+const changesUrl = mode === "url" || changesTitle;
 const reader = document.getElementById("reader");
 const log = document.getElementById("log");
 let article = 1;
@@ -62,9 +64,12 @@ function show(sample) {
   reader.replaceChildren(heading, body);
 }
 
-document.getElementById("mode").textContent = mode ? "比較 B：URL を変更する" : "比較 A：URL を変更しない";
-write(mode ? "B: pushState" : "A: no URL change");
+document.getElementById("mode").textContent = changesTitle
+  ? "比較 C：URL とタブ名を変更する"
+  : changesUrl ? "比較 B：URL を変更する" : "比較 A：URL を変更しない";
+write(changesTitle ? "C: pushState and document.title" : changesUrl ? "B: pushState" : "A: no URL change");
 show(samples[0]);
+if (changesTitle) document.title = samples[0].title + " - ReactFlux";
 const observer = new MutationObserver(snapshot);
 observer.observe(reader, { childList: true, characterData: true, subtree: true });
 observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class", "lang"] });
@@ -73,12 +78,16 @@ snapshot();
 document.getElementById("swap").addEventListener("click", (event) => {
   event.currentTarget.disabled = true;
   article = 2;
-  if (mode) {
+  if (changesUrl) {
     const url = new URL(location.href);
     url.searchParams.set("article", "2");
     history.pushState(null, "", url);
   }
   show(samples[1]);
+  if (changesTitle) {
+    document.title = samples[1].title + " - ReactFlux";
+    write("tab title changed");
+  }
   snapshot();
 });
 </script>
