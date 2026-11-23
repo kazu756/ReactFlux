@@ -1,7 +1,7 @@
 import { Button, Divider, Spin, Typography } from "@arco-design/web-react"
 import { IconEmpty, IconExclamationCircle } from "@arco-design/web-react/icon"
 import { useStore } from "@nanostores/react"
-import { forwardRef, useCallback, useEffect, useRef, useState } from "react"
+import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useInView } from "react-intersection-observer"
 import { Virtualizer } from "virtua"
 
@@ -24,6 +24,10 @@ import { articleListLayoutState } from "@/store/settingsState"
 import { formatLocalizedDate } from "@/utils/date"
 
 import "./ArticleList.css"
+
+// Enable an opt-in comparison without changing the default list behavior.
+const mountAllRowsForTranslation =
+  new URLSearchParams(globalThis.location.search).get("translation-preview") === "1"
 
 const ENTRY_PRESENTERS = {
   card: ArticleGridCard,
@@ -175,6 +179,11 @@ const ArticleList = forwardRef(
       scrollRootRef: cardsRef,
     })
 
+    const keptMountedRows = useMemo(
+      () => (mountAllRowsForTranslation ? virtualItems.map((_, index) => index) : undefined),
+      [virtualItems],
+    )
+
     return (
       <AdaptiveScrollArea
         ref={ref}
@@ -217,6 +226,7 @@ const ArticleList = forwardRef(
               ref={virtualizerRef}
               bufferSize={300}
               data={virtualItems}
+              keepMounted={keptMountedRows}
               scrollRef={cardsRef}
               onScroll={handleVirtualizerScroll}
             >
