@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Chrome page translation test</title>
+<style>
+body { max-width: 48rem; margin: 2rem auto; padding: 0 1rem; font: 1rem/1.6 system-ui; }
+button { padding: .5rem .8rem; font: inherit; }
+textarea { display: block; box-sizing: border-box; width: 100%; margin-top: .5rem; }
+</style>
+</head>
+<body>
+<main>
+  <div id="controls" lang="ja" translate="no">
+    <p id="mode"></p>
+    <button id="swap" type="button">次の記事を表示</button>
+  </div>
+  <article id="reader"></article>
+  <label lang="ja" translate="no">診断ログ<textarea id="log" rows="8" readonly></textarea></label>
+</main>
+<script>
+const samples = [
+  {
+    title: "City libraries are extending their evening opening hours",
+    body: "Several public libraries will stay open later during the week. The new schedule gives students more time to study and allows commuters to pick up books after work. Library staff will review visitor numbers at the end of the month."
+  },
+  {
+    title: "A coastal town restores walking trails after winter storms",
+    body: "Volunteers have repaired the wooden bridges and cleared fallen branches from the coastal paths. The local council expects the trails to reopen next week. Visitors will be able to reach the lighthouse on foot again."
+  }
+];
+const mode = new URLSearchParams(location.search).get("mode") === "url";
+const reader = document.getElementById("reader");
+const log = document.getElementById("log");
+let article = 1;
+let previous;
+const started = performance.now();
+
+function write(message) {
+  log.value += Math.round(performance.now() - started) + " ms | " + message + "\n";
+  log.scrollTop = log.scrollHeight;
+}
+
+function snapshot() {
+  const marker = document.documentElement.matches(".translated-ltr, .translated-rtl");
+  const state = "article " + article + " | marker " + (marker ? "on" : "off")
+    + " | heading font " + reader.querySelectorAll("h1 font").length
+    + " | body font " + reader.querySelectorAll("p font").length;
+  if (previous !== state) {
+    previous = state;
+    write(state);
+  }
+}
+
+function show(sample) {
+  const heading = document.createElement("h1");
+  const body = document.createElement("p");
+  heading.textContent = sample.title;
+  body.textContent = sample.body;
+  reader.replaceChildren(heading, body);
+}
+
+document.getElementById("mode").textContent = mode ? "比較 B：URL を変更する" : "比較 A：URL を変更しない";
+write(mode ? "B: pushState" : "A: no URL change");
+show(samples[0]);
+const observer = new MutationObserver(snapshot);
+observer.observe(reader, { childList: true, characterData: true, subtree: true });
+observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class", "lang"] });
+snapshot();
+
+document.getElementById("swap").addEventListener("click", (event) => {
+  event.currentTarget.disabled = true;
+  article = 2;
+  if (mode) {
+    const url = new URL(location.href);
+    url.searchParams.set("article", "2");
+    history.pushState(null, "", url);
+  }
+  show(samples[1]);
+  snapshot();
+});
+</script>
+</body>
+</html>
