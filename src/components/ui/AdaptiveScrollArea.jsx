@@ -59,11 +59,11 @@ const NativeScrollArea = forwardRef(
 )
 NativeScrollArea.displayName = "NativeScrollArea"
 
-const AdaptiveScrollArea = forwardRef((props, ref) => {
+const AdaptiveScrollArea = forwardRef(({ native = false, ...props }, ref) => {
   const { isBelowMedium } = useScreenWidth()
   const hasCoarsePointer = useStore(hasCoarsePointerState)
 
-  return isBelowMedium || hasCoarsePointer ? (
+  return native || isBelowMedium || hasCoarsePointer ? (
     <NativeScrollArea ref={ref} {...props} />
   ) : (
     <SimpleBar ref={ref} {...props} />
