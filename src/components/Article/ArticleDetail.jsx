@@ -83,6 +83,9 @@ function TranslationDiagnostics({ articleId }) {
   return <output ref={outputRef} translate="no" style={{ display: "block", padding: "8px" }} />
 }
 
+const useNativeReaderScroll =
+  new URLSearchParams(globalThis.location.search).has("translation-native-scroll")
+
 const showTranslationComparison =
   new URLSearchParams(globalThis.location.search).has("translation-compare")
 
@@ -637,6 +640,7 @@ const ArticleDetail = forwardRef(({ summaryButtonTarget }, ref) => {
       tabIndex={-1}
     >
       <AdaptiveScrollArea
+        native={useNativeReaderScroll}
         ref={scrollContainerRef}
         className="scroll-container"
         scrollableNodeProps={{ tabIndex: -1 }}
