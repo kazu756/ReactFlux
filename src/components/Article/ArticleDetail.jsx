@@ -600,14 +600,6 @@ const ArticleDetail = forwardRef(({ summaryButtonTarget }, ref) => {
     }
   }, [activeContent.id, isArticleBodyReady, renderableContentHtml])
 
-  // Focus the scrollable area when activeContent changes
-  useEffect(() => {
-    if (scrollContainerRef.current) {
-      const scrollElement = scrollContainerRef.current.getScrollElement()
-      scrollElement?.focus()
-    }
-  }, [activeContent.id])
-
   return (
     <article
       ref={ref}
