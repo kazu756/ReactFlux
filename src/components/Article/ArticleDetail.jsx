@@ -43,6 +43,49 @@ import { getSafeExternalUrl } from "@/utils/url"
 import "./ArticleDetail.css"
 import "./littlefoot.css"
 
+const showTranslationDiagnostics =
+  new URLSearchParams(globalThis.location.search).get("translation-diagnostics") === "1"
+
+function TranslationDiagnostics({ articleId }) {
+  const outputRef = useRef(null)
+
+  useEffect(() => {
+    const pane = outputRef.current?.closest("article")
+    if (!pane) return
+
+    let previousHeader
+    let previousBody
+    let headerChanges = 0
+    let bodyChanges = 0
+    const update = (records = []) => {
+      const header = pane.querySelector(".article-header")
+      const body = pane.querySelector(".article-body")
+      if (header !== previousHeader) headerChanges = 0
+      if (body !== previousBody) bodyChanges = 0
+      previousHeader = header
+      previousBody = body
+      for (const { target } of records) {
+        if (header?.contains(target)) headerChanges += 1
+        if (body?.contains(target)) bodyChanges += 1
+      }
+      const root = document.documentElement
+      const pageTranslation = root.classList.contains("translated-ltr") ||
+        root.classList.contains("translated-rtl")
+      const counts = (element) => element?.querySelectorAll("font").length ?? 0
+      const output = outputRef.current
+      const status = `記事 ${articleId} | ページ翻訳の目印 ${pageTranslation ? "あり" : "なし"} | 見出し DOM変更 ${headerChanges} / font ${counts(header)} | 本文 DOM変更 ${bodyChanges} / font ${counts(body)}`
+      if (output && output.textContent !== status) output.textContent = status
+    }
+    const observer = new MutationObserver(update)
+    observer.observe(pane, { subtree: true, childList: true, characterData: true })
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class", "lang"] })
+    update()
+    return () => observer.disconnect()
+  }, [articleId])
+
+  return <output ref={outputRef} translate="no" style={{ display: "block", padding: "8px" }} />
+}
+
 const ArticleLightbox = lazy(() => import("./ArticleLightbox"))
 const EMPTY_ATTACHMENTS = { items: [], primaryMedia: null }
 
@@ -570,6 +613,7 @@ const ArticleDetail = forwardRef(({ summaryButtonTarget }, ref) => {
         className="scroll-container"
         scrollableNodeProps={{ tabIndex: -1 }}
       >
+        {showTranslationDiagnostics && <TranslationDiagnostics articleId={activeContent.id} />}
         <AnimatePresence initial={false} mode="wait">
           <FadeTransition key={activeContent.id}>
             <div
