@@ -224,7 +224,6 @@ const ArticleList = forwardRef(
               bufferSize={300}
               data={virtualItems}
               keepMounted={keptMountedRows}
-              keepMounted={keptMountedRows}
               scrollRef={cardsRef}
               onScroll={handleVirtualizerScroll}
             >
