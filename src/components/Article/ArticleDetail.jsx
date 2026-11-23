@@ -7,7 +7,6 @@ import {
   lazy,
   Suspense,
   useCallback,
-  useDeferredValue,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -344,9 +343,6 @@ const ArticleDetail = forwardRef(({ summaryButtonTarget }, ref) => {
 
   const activeContent = useStore(activeContentState)
   const activeContentHtml = activeContent.content ?? ""
-  const deferredContentHtml = useDeferredValue(activeContentHtml, "")
-  const isArticleBodyPending = deferredContentHtml !== activeContentHtml
-  const renderableContentHtml = isArticleBodyPending ? "" : deferredContentHtml
   const {
     articleWidth,
     contentBrowsingDirection,
@@ -417,8 +413,8 @@ const ArticleDetail = forwardRef(({ summaryButtonTarget }, ref) => {
   const attachments = activeContent.attachments ?? EMPTY_ATTACHMENTS
   const { items: attachmentItems, primaryMedia } = attachments
   const { getImageIndex, imageSlides, visibleAttachments } = useMemo(
-    () => buildArticleImageModel(renderableContentHtml, attachmentItems),
-    [attachmentItems, renderableContentHtml],
+    () => buildArticleImageModel(activeContentHtml, attachmentItems),
+    [attachmentItems, activeContentHtml],
   )
   const enclosuresOpen =
     enclosuresOpenState.articleId === activeContent.id && enclosuresOpenState.open
@@ -427,8 +423,8 @@ const ArticleDetail = forwardRef(({ summaryButtonTarget }, ref) => {
     [getImageIndex, togglePhotoSlider],
   )
   const parsedHtml = useMemo(
-    () => ReactHtmlParser(renderableContentHtml, htmlParserOptions),
-    [htmlParserOptions, renderableContentHtml],
+    () => ReactHtmlParser(activeContentHtml, htmlParserOptions),
+    [htmlParserOptions, activeContentHtml],
   )
 
   const handlePhotoSliderView = ({ index }) => {
@@ -540,15 +536,11 @@ const ArticleDetail = forwardRef(({ summaryButtonTarget }, ref) => {
 
   // pretty footnotes
   useEffect(() => {
-    if (isArticleBodyPending) {
-      return
-    }
-
     const lf = littlefoot()
     return () => {
       lf.unmount()
     }
-  }, [activeContent.id, isArticleBodyPending])
+  }, [activeContent.id, activeContentHtml])
 
   // Focus the scrollable area when activeContent changes
   useEffect(() => {
@@ -617,8 +609,7 @@ const ArticleDetail = forwardRef(({ summaryButtonTarget }, ref) => {
             <Divider />
           </div>
           <div
-            key={`${activeContent.id}:${renderableContentHtml}`}
-            aria-busy={isArticleBodyPending || undefined}
+            key={`${activeContent.id}:${activeContentHtml}`}
             className="article-body"
             style={{
               fontSize: `${fontSize}rem`,
@@ -627,47 +618,42 @@ const ArticleDetail = forwardRef(({ summaryButtonTarget }, ref) => {
               "--article-width": articleWidth,
             }}
           >
-            {isArticleBodyPending ? (
-              <div className="article-body-loading" />
-            ) : (
-              <>
-                <ArticleSummary
-                  key={`${activeContent.id}:${activeContent.content}`}
-                  article={activeContent}
-                  buttonTarget={summaryButtonTarget}
-                />
-                {primaryMedia && (
-                  <EnclosurePlayer
-                    key={primaryMedia.id ?? primaryMedia.url}
-                    enclosure={primaryMedia}
-                    poster={coverSource}
-                  />
-                )}
-                {parsedHtml}
-                <ArticleEnclosures
-                  items={visibleAttachments}
-                  open={enclosuresOpen}
-                  onImagePreview={togglePhotoSlider}
-                  onOpenChange={handleEnclosuresOpenChange}
-                />
-                {hasOpenedPhotoSlider && (
-                  <Suspense fallback={null}>
-                    <ArticleLightbox
-                      animation={lightboxAnimationConfig}
-                      closeRequested={isPhotoSliderCloseRequested}
-                      direction={contentBrowsingDirection}
-                      index={selectedIndex}
-                      open={isPhotoSliderVisible}
-                      slides={imageSlides}
-                      onClose={completePhotoSliderClose}
-                      onExited={handlePhotoSliderExited}
-                      onExiting={handlePhotoSliderExiting}
-                      onView={handlePhotoSliderView}
-                    />
-                  </Suspense>
-                )}
-              </>
+            <ArticleSummary
+              key={`${activeContent.id}:${activeContent.content}`}
+              article={activeContent}
+              buttonTarget={summaryButtonTarget}
+            />
+            {primaryMedia && (
+              <EnclosurePlayer
+                key={primaryMedia.id ?? primaryMedia.url}
+                enclosure={primaryMedia}
+                poster={coverSource}
+              />
             )}
+            {parsedHtml}
+            <ArticleEnclosures
+              items={visibleAttachments}
+              open={enclosuresOpen}
+              onImagePreview={togglePhotoSlider}
+              onOpenChange={handleEnclosuresOpenChange}
+            />
+            {hasOpenedPhotoSlider && (
+              <Suspense fallback={null}>
+                <ArticleLightbox
+                  animation={lightboxAnimationConfig}
+                  closeRequested={isPhotoSliderCloseRequested}
+                  direction={contentBrowsingDirection}
+                  index={selectedIndex}
+                  open={isPhotoSliderVisible}
+                  slides={imageSlides}
+                  onClose={completePhotoSliderClose}
+                  onExited={handlePhotoSliderExited}
+                  onExiting={handlePhotoSliderExiting}
+                  onView={handlePhotoSliderView}
+                />
+              </Suspense>
+            )}
+
           </div>
         </FadeTransition>
       </AdaptiveScrollArea>
