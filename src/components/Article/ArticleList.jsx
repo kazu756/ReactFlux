@@ -1,7 +1,7 @@
 import { Button, Divider, Spin, Typography } from "@arco-design/web-react"
 import { IconEmpty, IconExclamationCircle } from "@arco-design/web-react/icon"
 import { useStore } from "@nanostores/react"
-import { forwardRef, useCallback, useEffect, useRef, useState } from "react"
+import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useInView } from "react-intersection-observer"
 import { Virtualizer } from "virtua"
 
@@ -175,6 +175,12 @@ const ArticleList = forwardRef(
       scrollRootRef: cardsRef,
     })
 
+    // Keep translated headlines and excerpts mounted while scrolling.
+    const keptMountedRows = useMemo(
+      () => virtualItems.map((_, index) => index),
+      [virtualItems],
+    )
+
     return (
       <AdaptiveScrollArea
         ref={ref}
@@ -217,6 +223,8 @@ const ArticleList = forwardRef(
               ref={virtualizerRef}
               bufferSize={300}
               data={virtualItems}
+              keepMounted={keptMountedRows}
+              keepMounted={keptMountedRows}
               scrollRef={cardsRef}
               onScroll={handleVirtualizerScroll}
             >
