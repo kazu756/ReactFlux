@@ -42,9 +42,6 @@ import { getSafeExternalUrl } from "@/utils/url"
 import "./ArticleDetail.css"
 import "./littlefoot.css"
 
-const translationPreview =
-  new URLSearchParams(globalThis.location.search).get("translation-preview") === "1"
-
 const ArticleLightbox = lazy(() => import("./ArticleLightbox"))
 const EMPTY_ATTACHMENTS = { items: [], primaryMedia: null }
 
@@ -705,34 +702,32 @@ const ArticleDetail = forwardRef(({ summaryButtonTarget }, ref) => {
                     poster={coverSource}
                   />
                 )}
-                {(translationPreview || articleTranslator) && (
-                  <div translate="no">
-                    {globalThis.Translator ? (
-                      <Button
-                        loading={translatorStarting}
-                        onClick={() => {
-                          if (articleTranslator) {
-                            setArticleTranslator(null)
-                            setTranslation(null)
-                          } else {
-                            void enableArticleTranslation()
-                          }
-                        }}
-                      >
-                        {articleTranslator ? "本文の自動翻訳を終了" : "英語本文の自動翻訳を開始"}
-                      </Button>
-                    ) : (
-                      <span>このブラウザでは本文の自動翻訳を利用できません。</span>
-                    )}
-                    {translationError && <p role="status">{translationError}</p>}
-                    {articleTranslator && translation?.source !== renderableContentHtml && (
-                      <p role="status">本文を翻訳中…</p>
-                    )}
-                    {articleTranslator &&
-                      translation?.source === renderableContentHtml &&
-                      !translatedHtml && <p role="status">本文を翻訳できませんでした。</p>}
-                  </div>
-                )}
+                <div translate="no">
+                  {globalThis.Translator ? (
+                    <Button
+                      loading={translatorStarting}
+                      onClick={() => {
+                        if (articleTranslator) {
+                          setArticleTranslator(null)
+                          setTranslation(null)
+                        } else {
+                          void enableArticleTranslation()
+                        }
+                      }}
+                    >
+                      {articleTranslator ? "本文の自動翻訳を終了" : "英語本文の自動翻訳を開始"}
+                    </Button>
+                  ) : (
+                    <span>このブラウザでは本文の自動翻訳を利用できません。</span>
+                  )}
+                  {translationError && <p role="status">{translationError}</p>}
+                  {articleTranslator && translation?.source !== renderableContentHtml && (
+                    <p role="status">本文を翻訳中…</p>
+                  )}
+                  {articleTranslator &&
+                    translation?.source === renderableContentHtml &&
+                    !translatedHtml && <p role="status">本文を翻訳できませんでした。</p>}
+                </div>
                 {translatedHtml ? <div translate="no">{parsedHtml}</div> : parsedHtml}
                 <ArticleEnclosures
                   items={visibleAttachments}
