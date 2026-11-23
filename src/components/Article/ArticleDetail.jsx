@@ -384,7 +384,21 @@ const ArticleDetail = forwardRef(({ summaryButtonTarget }, ref) => {
   const prefersReducedMotion = useStore(prefersReducedMotionState)
 
   const activeContent = useStore(activeContentState)
-  const renderableContentHtml = activeContent.content ?? ""
+  const [readyArticleId, setReadyArticleId] = useState(null)
+  const articleId = activeContent.id
+  const isArticleBodyReady = readyArticleId === articleId
+  const renderableContentHtml = isArticleBodyReady ? (activeContent.content ?? "") : ""
+
+  useEffect(() => {
+    let timer
+    const frame = requestAnimationFrame(() => {
+      timer = setTimeout(() => setReadyArticleId(articleId), 0)
+    })
+    return () => {
+      cancelAnimationFrame(frame)
+      clearTimeout(timer)
+    }
+  }, [articleId])
   const {
     articleWidth,
     contentBrowsingDirection,
@@ -578,11 +592,13 @@ const ArticleDetail = forwardRef(({ summaryButtonTarget }, ref) => {
 
   // pretty footnotes
   useEffect(() => {
+    if (!isArticleBodyReady) return
+
     const lf = littlefoot()
     return () => {
       lf.unmount()
     }
-  }, [activeContent.id, renderableContentHtml])
+  }, [activeContent.id, isArticleBodyReady, renderableContentHtml])
 
   // Focus the scrollable area when activeContent changes
   useEffect(() => {
@@ -651,52 +667,56 @@ const ArticleDetail = forwardRef(({ summaryButtonTarget }, ref) => {
             </Typography.Text>
             <Divider />
           </div>
-          <div
-            key={`${activeContent.id}:${renderableContentHtml}`}
-            className="article-body"
-            style={{
-              fontSize: `${fontSize}rem`,
-              maxWidth: responsiveMaxWidth,
-              fontFamily: fontFamily,
-              "--article-width": articleWidth,
-            }}
-          >
-            <ArticleSummary
-              key={`${activeContent.id}:${activeContent.content}`}
-              article={activeContent}
-              buttonTarget={summaryButtonTarget}
-            />
-            {primaryMedia && (
-              <EnclosurePlayer
-                key={primaryMedia.id ?? primaryMedia.url}
-                enclosure={primaryMedia}
-                poster={coverSource}
+          {isArticleBodyReady ? (
+            <div
+              key={`${activeContent.id}:${renderableContentHtml}`}
+              className="article-body"
+              style={{
+                fontSize: `${fontSize}rem`,
+                maxWidth: responsiveMaxWidth,
+                fontFamily: fontFamily,
+                "--article-width": articleWidth,
+              }}
+            >
+              <ArticleSummary
+                key={`${activeContent.id}:${activeContent.content}`}
+                article={activeContent}
+                buttonTarget={summaryButtonTarget}
               />
-            )}
-            {parsedHtml}
-            <ArticleEnclosures
-              items={visibleAttachments}
-              open={enclosuresOpen}
-              onImagePreview={togglePhotoSlider}
-              onOpenChange={handleEnclosuresOpenChange}
-            />
-            {hasOpenedPhotoSlider && (
-              <Suspense fallback={null}>
-                <ArticleLightbox
-                  animation={lightboxAnimationConfig}
-                  closeRequested={isPhotoSliderCloseRequested}
-                  direction={contentBrowsingDirection}
-                  index={selectedIndex}
-                  open={isPhotoSliderVisible}
-                  slides={imageSlides}
-                  onClose={completePhotoSliderClose}
-                  onExited={handlePhotoSliderExited}
-                  onExiting={handlePhotoSliderExiting}
-                  onView={handlePhotoSliderView}
+              {primaryMedia && (
+                <EnclosurePlayer
+                  key={primaryMedia.id ?? primaryMedia.url}
+                  enclosure={primaryMedia}
+                  poster={coverSource}
                 />
-              </Suspense>
-            )}
-          </div>
+              )}
+              {parsedHtml}
+              <ArticleEnclosures
+                items={visibleAttachments}
+                open={enclosuresOpen}
+                onImagePreview={togglePhotoSlider}
+                onOpenChange={handleEnclosuresOpenChange}
+              />
+              {hasOpenedPhotoSlider && (
+                <Suspense fallback={null}>
+                  <ArticleLightbox
+                    animation={lightboxAnimationConfig}
+                    closeRequested={isPhotoSliderCloseRequested}
+                    direction={contentBrowsingDirection}
+                    index={selectedIndex}
+                    open={isPhotoSliderVisible}
+                    slides={imageSlides}
+                    onClose={completePhotoSliderClose}
+                    onExited={handlePhotoSliderExited}
+                    onExiting={handlePhotoSliderExiting}
+                    onView={handlePhotoSliderView}
+                  />
+                </Suspense>
+              )}
+            </div>
+          ) : (
+            <div className="article-body-loading" />
+          )}
         </div>
       </AdaptiveScrollArea>
     </article>
