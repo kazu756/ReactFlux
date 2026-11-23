@@ -1,4 +1,4 @@
-import { Button, Divider, Tag, Typography } from "@arco-design/web-react"
+import { Divider, Tag, Typography } from "@arco-design/web-react"
 import { useStore } from "@nanostores/react"
 import ReactHtmlParser, { attributesToProps, domToReact } from "html-react-parser"
 import { littlefoot } from "littlefoot"
@@ -202,7 +202,7 @@ const processFigcaptionContent = (children) => {
 }
 
 const handleFigure = (node, getImageIndex, togglePhotoSlider, options) => {
-  const firstChild = node.firstElementChild
+  const firstChild = node.children[0]
   const hasImages = node.children.some((child) => child.name === "img")
 
   // Handle code blocks wrapped in figure
@@ -426,68 +426,9 @@ const ArticleDetail = forwardRef(({ summaryButtonTarget }, ref) => {
     () => getHtmlParserOptions(getImageIndex, togglePhotoSlider),
     [getImageIndex, togglePhotoSlider],
   )
-  const [articleTranslator, setArticleTranslator] = useState(null)
-  const [translation, setTranslation] = useState(null)
-  const [translationError, setTranslationError] = useState("")
-  const [translatorStarting, setTranslatorStarting] = useState(false)
-  const translatedHtml = translation?.source === renderableContentHtml ? translation.html : null
-
-  const enableArticleTranslation = async () => {
-    setTranslatorStarting(true)
-    setTranslationError("")
-    try {
-      setArticleTranslator(
-        await globalThis.Translator.create({
-          sourceLanguage: "en",
-          targetLanguage: "ja",
-        }),
-      )
-    } catch {
-      setTranslationError("英語から日本語への翻訳を開始できませんでした。")
-    } finally {
-      setTranslatorStarting(false)
-    }
-  }
-
-  useEffect(() => {
-    if (!articleTranslator || !renderableContentHtml) {return}
-
-    const controller = new AbortController()
-    const translateArticle = async () => {
-      const template = document.createElement("template")
-      template.innerHTML = renderableContentHtml
-      const walker = document.createTreeWalker(template.content, NodeFilter.SHOW_TEXT)
-      for (let node = walker.nextNode(); node; node = walker.nextNode()) {
-        controller.signal.throwIfAborted()
-        const text = node.data.trim()
-        if (
-          !/[a-z]{2}/i.test(text) ||
-          node.parentElement?.closest(
-            "code, pre, kbd, script, style, svg, math, textarea, [translate=no], .notranslate",
-          )
-        ) {
-          continue
-        }
-        const japanese = await articleTranslator.translate(text, { signal: controller.signal })
-        node.data = node.data.replace(text, () => japanese)
-      }
-      if (!controller.signal.aborted) {
-        setTranslation({ source: renderableContentHtml, html: template.innerHTML })
-      }
-    }
-    translateArticle().catch(() => {
-      if (!controller.signal.aborted) {
-        setTranslation({ source: renderableContentHtml, html: null })
-      }
-    })
-    return () => controller.abort()
-  }, [articleTranslator, renderableContentHtml])
-
-  useEffect(() => () => articleTranslator?.destroy(), [articleTranslator])
-
   const parsedHtml = useMemo(
-    () => ReactHtmlParser(translatedHtml ?? renderableContentHtml, htmlParserOptions),
-    [htmlParserOptions, renderableContentHtml, translatedHtml],
+    () => ReactHtmlParser(renderableContentHtml, htmlParserOptions),
+    [htmlParserOptions, renderableContentHtml],
   )
 
   const handlePhotoSliderView = ({ index }) => {
@@ -702,33 +643,7 @@ const ArticleDetail = forwardRef(({ summaryButtonTarget }, ref) => {
                     poster={coverSource}
                   />
                 )}
-                <div translate="no">
-                  {globalThis.Translator ? (
-                    <Button
-                      loading={translatorStarting}
-                      onClick={() => {
-                        if (articleTranslator) {
-                          setArticleTranslator(null)
-                          setTranslation(null)
-                        } else {
-                          void enableArticleTranslation()
-                        }
-                      }}
-                    >
-                      {articleTranslator ? "本文の自動翻訳を終了" : "英語本文の自動翻訳を開始"}
-                    </Button>
-                  ) : (
-                    <span>このブラウザでは本文の自動翻訳を利用できません。</span>
-                  )}
-                  {translationError && <p role="status">{translationError}</p>}
-                  {articleTranslator && translation?.source !== renderableContentHtml && (
-                    <p role="status">本文を翻訳中…</p>
-                  )}
-                  {articleTranslator &&
-                    translation?.source === renderableContentHtml &&
-                    !translatedHtml && <p role="status">本文を翻訳できませんでした。</p>}
-                </div>
-                {translatedHtml ? <div translate="no">{parsedHtml}</div> : parsedHtml}
+                {parsedHtml}
                 <ArticleEnclosures
                   items={visibleAttachments}
                   open={enclosuresOpen}
