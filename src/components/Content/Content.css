@@ -105,9 +105,7 @@
   touch-action: none;
 }
 
-.entry-col-resize-handle:hover,
-.entry-col-resize-handle:focus-visible,
-.entry-col-resize-handle:active {
+.entry-col-resize-handle:focus-visible {
   background-color: rgb(var(--primary-6));
 }
 
