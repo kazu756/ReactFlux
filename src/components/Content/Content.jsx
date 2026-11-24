@@ -33,6 +33,27 @@ import prepareEntry from "@/utils/entry-presentation"
 
 import "./Content.css"
 
+const LIST_WIDTH_KEY = "reactflux.articleListWidth"
+const MIN_LIST_WIDTH = 280
+const MAX_LIST_WIDTH = 720
+
+function readListWidth() {
+  try {
+    const value = Number(localStorage.getItem(LIST_WIDTH_KEY))
+    return value >= MIN_LIST_WIDTH && value <= MAX_LIST_WIDTH ? value : null
+  } catch {
+    return null
+  }
+}
+
+function saveListWidth(width) {
+  try {
+    localStorage.setItem(LIST_WIDTH_KEY, String(width))
+  } catch {
+    // The current width is still usable when storage is unavailable.
+  }
+}
+
 const ArticleDetail = lazy(() => import("@/components/Article/ArticleDetail"))
 
 const isInHorizontalScrollable = (element) => {
@@ -229,15 +250,39 @@ const Content = ({ info, getEntries, markAllAsRead }) => {
 
   const isFullSizeDetail = isFullWidthLayout || isBelowMedium
   const isDetailLayerActive = Boolean(activeContent) && isFullSizeDetail
+  const canResizeList = !isFullSizeDetail
+  const [listWidth, setListWidth] = useState(readListWidth)
+  const listPaneRef = useRef(null)
+  const resizeDrag = useRef(null)
+
+  const resizeList = (requestedWidth) => {
+    const available = listPaneRef.current.parentElement.clientWidth
+    const maximum = Math.max(MIN_LIST_WIDTH, Math.min(MAX_LIST_WIDTH, Math.floor(available * 0.6)))
+    const width = Math.min(maximum, Math.max(MIN_LIST_WIDTH, Math.round(requestedWidth)))
+    setListWidth(width)
+    return width
+  }
+
+  const finishResize = ({ pointerId }) => {
+    if (resizeDrag.current?.pointerId !== pointerId) return
+    const { width } = resizeDrag.current
+    resizeDrag.current = null
+    if (width !== null) saveListWidth(width)
+  }
 
   return (
     <>
       <div
+        ref={listPaneRef}
         aria-hidden={isDetailLayerActive || undefined}
-        className={classNames("entry-col", { "entry-col-full-width": isFullWidthLayout })}
+        className={classNames("entry-col", {
+          "entry-col-full-width": isFullWidthLayout,
+          "entry-col-resizable": canResizeList,
+        })}
         inert={isDetailLayerActive || undefined}
         style={{
           opacity: isBelowMedium && isArticleLoading ? 0 : 1,
+          "--entry-col-width": canResizeList && listWidth !== null ? `${listWidth}px` : undefined,
         }}
       >
         <SearchAndSortBar fullWidth={isFullWidthLayout} />
@@ -255,6 +300,44 @@ const Content = ({ info, getEntries, markAllAsRead }) => {
           refreshArticleList={fetchArticleListWithRelatedData}
         />
       </div>
+      {canResizeList && (
+        <div
+          className="entry-col-resize-handle"
+          role="separator"
+          aria-label="記事一覧の幅 / Article list width"
+          aria-orientation="vertical"
+          aria-valuemin={MIN_LIST_WIDTH}
+          aria-valuemax={MAX_LIST_WIDTH}
+          aria-valuenow={listWidth ?? 370}
+          tabIndex={0}
+          onPointerDown={(event) => {
+            if (!event.isPrimary || event.button !== 0) return
+            event.currentTarget.focus({ preventScroll: true })
+            event.currentTarget.setPointerCapture(event.pointerId)
+            resizeDrag.current = {
+              pointerId: event.pointerId,
+              startX: event.clientX,
+              startWidth: listPaneRef.current.getBoundingClientRect().width,
+              width: null,
+            }
+          }}
+          onPointerMove={(event) => {
+            const drag = resizeDrag.current
+            if (drag?.pointerId !== event.pointerId) return
+            drag.width = resizeList(drag.startWidth + event.clientX - drag.startX)
+          }}
+          onPointerUp={finishResize}
+          onPointerCancel={finishResize}
+          onLostPointerCapture={finishResize}
+          onKeyDown={(event) => {
+            if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return
+            event.preventDefault()
+            event.stopPropagation()
+            const width = listPaneRef.current.getBoundingClientRect().width
+            saveListWidth(resizeList(width + (event.key === "ArrowLeft" ? -16 : 16)))
+          }}
+        />
+      )}
       {activeContent ? (
         <div
           className={classNames("article-container", "content-wrapper", {
