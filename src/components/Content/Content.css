@@ -106,7 +106,8 @@
 }
 
 .entry-col-resize-handle:focus-visible {
-  background-color: rgb(var(--primary-6));
+  outline: 1px dashed var(--color-text-3);
+  outline-offset: -1px;
 }
 
 .entry-col-resize-handle + .article-container {
