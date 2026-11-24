@@ -89,3 +89,28 @@
     width: 100%;
   }
 }
+
+.entry-col-resizable {
+  flex: 0 0 auto;
+  min-width: 0;
+  width: var(--entry-col-width, 370px);
+  max-width: 60%;
+}
+
+.entry-col-resize-handle {
+  position: relative;
+  flex: 0 0 6px;
+  align-self: stretch;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.entry-col-resize-handle:hover,
+.entry-col-resize-handle:focus-visible,
+.entry-col-resize-handle:active {
+  background-color: rgb(var(--primary-6));
+}
+
+.entry-col-resize-handle + .article-container {
+  min-width: 0;
+}
