@@ -52,7 +52,7 @@
 
 .list-entry-source-title {
   color: var(--color-text-2);
-  font-size: 0.8125rem;
+  font-size: calc(0.8125rem * var(--article-list-font-scale, 1));
   font-weight: 600;
   line-height: 1.35;
   overflow: hidden;
@@ -73,7 +73,7 @@
   max-width: 100%;
   margin: 0;
   color: var(--color-text-2);
-  font-size: 0.9375rem;
+  font-size: calc(0.9375rem * var(--article-list-font-scale, 1));
   font-weight: 600;
   line-height: 1.4;
   overflow: hidden;
@@ -95,7 +95,7 @@
   flex: 1 4 auto;
   min-width: 0;
   color: var(--color-text-3);
-  font-size: 0.875rem;
+  font-size: calc(0.875rem * var(--article-list-font-scale, 1));
   line-height: 1.4;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -108,7 +108,7 @@
   justify-content: flex-end;
   gap: 8px;
   color: var(--color-text-3);
-  font-size: 0.8125rem;
+  font-size: calc(0.8125rem * var(--article-list-font-scale, 1));
   font-variant-numeric: tabular-nums;
   line-height: 1.35;
   white-space: nowrap;

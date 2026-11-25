@@ -20,7 +20,7 @@ import useLoadMore from "@/hooks/useLoadMore"
 import useReadOnScroll from "@/hooks/useReadOnScroll"
 import articleListEmptyState from "@/store/articleListEmptyState"
 import { contentState, filteredEntriesState } from "@/store/contentState"
-import { articleListLayoutState } from "@/store/settingsState"
+import { articleListLayoutState, settingsState } from "@/store/settingsState"
 import { formatLocalizedDate } from "@/utils/date"
 
 import "./ArticleList.css"
@@ -153,6 +153,9 @@ const ArticleList = forwardRef(
     const filteredEntries = useStore(filteredEntriesState)
     const { polyglot } = useStore(polyglotState)
     const articleListLayout = useStore(articleListLayoutState)
+    const { articleListFontFamily, articleListFontSize } = useStore(settingsState, {
+      keys: ["articleListFontFamily", "articleListFontSize"],
+    })
     const articleActivation = useArticleCardActivation(handleEntryClick)
     const observeRead = useReadOnScroll(cardsRef)
     const isWaitingForCatalog = emptyState?.phase === "waiting-for-catalog"
@@ -185,6 +188,10 @@ const ArticleList = forwardRef(
       <AdaptiveScrollArea
         ref={ref}
         className={`entry-list entry-list-layout-${articleListLayout}`}
+        style={{
+          fontFamily: articleListFontFamily === "system-ui" ? undefined : articleListFontFamily,
+          "--article-list-font-scale": articleListFontSize / 100,
+        }}
         scrollableNodeProps={{ ref: setScrollRoot, tabIndex: 0 }}
       >
         <LoadingCards

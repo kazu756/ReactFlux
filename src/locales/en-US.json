@@ -432,6 +432,8 @@
     "summary_lines_description": "Number of lines to show in article preview (0 to hide)",
     "lightbox_animation_label": "Lightbox animation",
     "lightbox_animation_description": "Enable slide animations for image switching",
+    "article_list_font_label": "Article list font",
+    "article_list_font_size_label": "Article list text size",
     "font_size_label": "Font size",
     "font_size_description": "Set the text size in the article view",
     "article_width_label": "Article width",

@@ -64,7 +64,7 @@
   min-width: 0;
   max-width: 100%;
   color: var(--color-text-3);
-  font-size: 0.9375rem;
+  font-size: calc(0.9375rem * var(--article-list-font-scale, 1));
   font-weight: 600;
   line-height: 1.4;
   text-align: center;
@@ -102,7 +102,7 @@
   gap: 8px;
   min-width: 0;
   color: var(--color-text-3);
-  font-size: 0.8125rem;
+  font-size: calc(0.8125rem * var(--article-list-font-scale, 1));
   font-variant-numeric: tabular-nums;
   line-height: 1.35;
 }
@@ -141,7 +141,7 @@
   display: -webkit-box;
   margin: 0;
   color: var(--color-text-2);
-  font-size: 1rem;
+  font-size: calc(1rem * var(--article-list-font-scale, 1));
   font-weight: 600;
   line-height: 1.4;
   -webkit-box-orient: vertical;
@@ -155,7 +155,7 @@
   display: -webkit-box;
   margin: 0;
   color: var(--color-text-3);
-  font-size: 0.875rem;
+  font-size: calc(0.875rem * var(--article-list-font-scale, 1));
   line-height: 1.45;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -169,7 +169,7 @@
   min-height: 18px;
   margin-top: auto;
   color: var(--color-text-3);
-  font-size: 0.8125rem;
+  font-size: calc(0.8125rem * var(--article-list-font-scale, 1));
   line-height: 1.35;
 }
 
@@ -196,15 +196,15 @@
 @media screen and (max-width: 768px) {
   .grid-card-fallback-source,
   .grid-card-title {
-    font-size: 1.0625rem;
+    font-size: calc(1.0625rem * var(--article-list-font-scale, 1));
   }
 
   .grid-card-summary {
-    font-size: 0.9375rem;
+    font-size: calc(0.9375rem * var(--article-list-font-scale, 1));
   }
 
   .grid-card-meta,
   .grid-card-footer {
-    font-size: 0.875rem;
+    font-size: calc(0.875rem * var(--article-list-font-scale, 1));
   }
 }

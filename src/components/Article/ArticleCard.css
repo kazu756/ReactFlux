@@ -1,6 +1,6 @@
 .card-author {
   color: var(--color-text-3);
-  font-size: 0.8125rem;
+  font-size: calc(0.8125rem * var(--article-list-font-scale, 1));
   font-weight: normal;
   line-height: 1.4;
   overflow: hidden;
@@ -52,7 +52,7 @@
 
 .card-preview {
   color: var(--color-text-2);
-  font-size: 0.9rem;
+  font-size: calc(0.9rem * var(--article-list-font-scale, 1));
   line-height: 1.5;
   margin: 0;
   display: -webkit-box;
@@ -65,7 +65,7 @@
   align-items: center;
   gap: 4px;
   color: var(--color-text-3);
-  font-size: 0.8125rem;
+  font-size: calc(0.8125rem * var(--article-list-font-scale, 1));
   line-height: 1.4;
   margin-bottom: 4px;
 }
@@ -86,7 +86,7 @@
 
 .card-source-title {
   color: var(--color-text-2);
-  font-size: 0.8125rem;
+  font-size: calc(0.8125rem * var(--article-list-font-scale, 1));
   font-weight: 600;
   line-height: 1.4;
 }
@@ -118,7 +118,7 @@
 
 .card-time-wrapper {
   color: var(--color-text-3);
-  font-size: 0.8125rem;
+  font-size: calc(0.8125rem * var(--article-list-font-scale, 1));
   font-variant-numeric: tabular-nums;
   line-height: 1.4;
   display: flex;
@@ -128,7 +128,7 @@
 
 .card-title {
   color: var(--color-text-2);
-  font-size: 1rem;
+  font-size: calc(1rem * var(--article-list-font-scale, 1));
   font-weight: 600;
   line-height: 1.4;
   margin: 0;
@@ -157,17 +157,17 @@
 
 @media screen and (max-width: 768px) {
   .card-title {
-    font-size: 1.0625rem;
+    font-size: calc(1.0625rem * var(--article-list-font-scale, 1));
   }
 
   .card-preview {
-    font-size: 0.9375rem;
+    font-size: calc(0.9375rem * var(--article-list-font-scale, 1));
   }
 
   .card-author,
   .card-reading-time,
   .card-source-title,
   .card-time-wrapper {
-    font-size: 0.875rem;
+    font-size: calc(0.875rem * var(--article-list-font-scale, 1));
   }
 }

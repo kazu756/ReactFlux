@@ -30,6 +30,8 @@ const handleConfigChange = (settingsChanges) => {
 
 const Appearance = () => {
   const {
+    articleListFontFamily,
+    articleListFontSize,
     articleListLayout,
     articleWidth,
     compactSidebarGroups,
@@ -49,6 +51,8 @@ const Appearance = () => {
     titleAlignment,
   } = useStore(settingsState, {
     keys: [
+      "articleListFontFamily",
+      "articleListFontSize",
       "articleListLayout",
       "articleWidth",
       "compactSidebarGroups",
@@ -143,6 +147,34 @@ const Appearance = () => {
       </SettingSection>
 
       <SettingSection title={polyglot.t("settings.section_article_list")}>
+        <SettingItem title={polyglot.t("appearance.article_list_font_label", { _: "Article list font" })}>
+          <Select
+            className="input-select"
+            value={articleListFontFamily}
+            onChange={(value) => handleConfigChange({ articleListFontFamily: value })}
+          >
+            {fontFamilyOptions.map(({ label, value }) => (
+              <Select.Option key={value} value={value}>
+                {label}
+              </Select.Option>
+            ))}
+          </Select>
+        </SettingItem>
+
+        <SettingItem title={polyglot.t("appearance.article_list_font_size_label", { _: "Article list text size" })}>
+          <InputNumber
+            className="input-number"
+            max={150}
+            min={80}
+            mode="button"
+            size="small"
+            step={5}
+            suffix="%"
+            value={articleListFontSize}
+            onChange={(value) => handleConfigChange({ articleListFontSize: value })}
+          />
+        </SettingItem>
+
         <SettingItem
           description={polyglot.t("appearance.article_list_layout_description")}
           title={polyglot.t("appearance.article_list_layout_label")}

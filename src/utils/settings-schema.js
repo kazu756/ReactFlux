@@ -104,6 +104,8 @@ const sanitizeLanguage = (value, fallback) => {
 }
 
 const SETTINGS_SCHEMA = {
+  articleListFontFamily: enumSetting("system-ui", FONT_FAMILIES, FONT_FAMILY_MIGRATIONS),
+  articleListFontSize: numberSetting(100, 80, 150, { precision: 0 }),
   articleListLayout: enumSetting("column", ARTICLE_LIST_LAYOUTS),
   articleWidth: numberSetting(75, MIN_ARTICLE_WIDTH, MAX_ARTICLE_WIDTH, { precision: 2 }),
   checkForUpdates: booleanSetting(false),

@@ -442,6 +442,8 @@
     "summary_lines_description": "記事プレビューに表示する行数（0で非表示）",
     "lightbox_animation_label": "ライトボックスアニメーション",
     "lightbox_animation_description": "画像切り替え時のスライドアニメーションを有効化",
+    "article_list_font_label": "一覧のフォント",
+    "article_list_font_size_label": "一覧の文字サイズ",
     "font_size_label": "フォントサイズ",
     "font_size_description": "記事ビューの文字サイズを設定",
     "article_width_label": "記事の幅",
